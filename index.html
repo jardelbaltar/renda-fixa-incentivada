@@ -132,6 +132,67 @@
         margin-bottom: 18px;
       }
 
+      .market-panel {
+        background: #f2f2f2;
+        color: #161616;
+        border-radius: 16px;
+        padding: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .market-panel h3 {
+        margin: 0;
+        font-size: 2rem;
+        line-height: 1.1;
+      }
+
+      .market-panel p {
+        margin: 4px 0 0;
+        color: #f15d22;
+        font-weight: 700;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 16px 0;
+      }
+
+      .controls input,
+      .controls button {
+        border-radius: 8px;
+        border: 1px solid #d0d0d0;
+        padding: 10px 12px;
+        font: inherit;
+      }
+
+      .controls button {
+        background: #161616;
+        color: #fff;
+        cursor: pointer;
+      }
+
+      .hint {
+        margin: 4px 0 16px;
+        color: #4b4b4b;
+        font-size: 0.9rem;
+      }
+
+      .chart-wrap {
+        background: #fff;
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid #d7d7d7;
+      }
+
+      #status {
+        margin-top: 10px;
+        min-height: 22px;
+        color: #2f2f2f;
+        font-size: 0.92rem;
+      }
+
       .cards {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -217,6 +278,27 @@
 
     <main class="container">
       <section class="section">
+        <div class="market-panel">
+          <h3>Mercado Secundário</h3>
+          <p>Evolução Spread Médio IPCA + Incentivadas por Rating (bps)</p>
+
+          <div class="controls">
+            <input id="sheetFile" type="file" accept=".xlsx,.xls,.csv" />
+            <button id="loadSample" type="button">Carregar exemplo</button>
+          </div>
+          <p class="hint">
+            Planilha esperada com colunas: <strong>Período</strong>, <strong>AAA</strong>, <strong>Total (ex. AAA)</strong> e
+            <strong>Total</strong>.
+          </p>
+
+          <div class="chart-wrap">
+            <canvas id="spreadChart" height="260"></canvas>
+          </div>
+          <div id="status"></div>
+        </div>
+      </section>
+
+      <section class="section">
         <h2 class="section-title">Visão completa para decisões inteligentes</h2>
         <div class="cards">
           <article class="card">
@@ -249,5 +331,171 @@
     <footer>
       <div class="container">Página inicial pronta para expansão com menus e novas funcionalidades.</div>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+      const sampleData = [
+        { Periodo: "jan-25", AAA: 32, "Total (ex. AAA)": 62, Total: 22 },
+        { Periodo: "mar-25", AAA: 26, "Total (ex. AAA)": 53, Total: 18 },
+        { Periodo: "mai-25", AAA: 16, "Total (ex. AAA)": 79, Total: 9 },
+        { Periodo: "jul-25", AAA: 8, "Total (ex. AAA)": 42, Total: 2 },
+        { Periodo: "set-25", AAA: -22, "Total (ex. AAA)": 46, Total: -12 },
+        { Periodo: "out-25", AAA: -68, "Total (ex. AAA)": 18, Total: -44 },
+        { Periodo: "nov-25", AAA: -18, "Total (ex. AAA)": 28, Total: -2 },
+        { Periodo: "jan-26", AAA: -42, "Total (ex. AAA)": 16, Total: -28 },
+      ];
+
+      const statusEl = document.getElementById("status");
+      const fileInput = document.getElementById("sheetFile");
+      const loadSampleBtn = document.getElementById("loadSample");
+      const chartCtx = document.getElementById("spreadChart");
+
+      let spreadChart;
+
+      function normalizeName(value) {
+        return (value || "")
+          .toString()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/\s+/g, "")
+          .replace(/[().]/g, "");
+      }
+
+      function toNumber(value) {
+        if (typeof value === "number") return value;
+        if (typeof value !== "string") return NaN;
+        const cleaned = value.replace(/\./g, "").replace(",", ".").replace(/[^0-9.-]/g, "");
+        return Number(cleaned);
+      }
+
+      function getValue(row, aliases) {
+        const found = Object.keys(row).find((key) => aliases.includes(normalizeName(key)));
+        return found ? row[found] : undefined;
+      }
+
+      function transformRows(rows) {
+        const formatted = rows
+          .map((row) => {
+            const periodo = getValue(row, ["periodo", "mes", "data"]);
+            const aaa = toNumber(getValue(row, ["aaa"]));
+            const totalExAaa = toNumber(getValue(row, ["totalexaaa", "totalexcaaa", "totalsemaaa", "totalsexaaa"]));
+            const total = toNumber(getValue(row, ["total"]));
+
+            return {
+              periodo: periodo ? String(periodo) : null,
+              aaa,
+              totalExAaa,
+              total,
+            };
+          })
+          .filter((row) => row.periodo && ![row.aaa, row.totalExAaa, row.total].some(Number.isNaN));
+
+        if (!formatted.length) {
+          throw new Error("Nenhuma linha válida encontrada. Confira os nomes das colunas na planilha.");
+        }
+
+        return formatted;
+      }
+
+      function drawChart(rows) {
+        const labels = rows.map((row) => row.periodo);
+        const aaa = rows.map((row) => row.aaa);
+        const totalExAaa = rows.map((row) => row.totalExAaa);
+        const total = rows.map((row) => row.total);
+
+        if (spreadChart) {
+          spreadChart.destroy();
+        }
+
+        spreadChart = new Chart(chartCtx, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "AAA",
+                data: aaa,
+                borderColor: "#f97316",
+                borderDash: [2, 6],
+                tension: 0.32,
+                borderWidth: 3,
+                pointRadius: 0,
+              },
+              {
+                label: "Total (ex. AAA)",
+                data: totalExAaa,
+                borderColor: "#808080",
+                borderDash: [1, 6],
+                tension: 0.32,
+                borderWidth: 3,
+                pointRadius: 0,
+              },
+              {
+                label: "Total",
+                data: total,
+                borderColor: "#161616",
+                tension: 0.32,
+                borderWidth: 3,
+                pointRadius: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { usePointStyle: true, pointStyle: "line" },
+              },
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { color: "#272727" },
+              },
+              y: {
+                suggestedMin: -80,
+                suggestedMax: 80,
+                ticks: { stepSize: 20, color: "#272727" },
+                grid: { color: "#efefef" },
+              },
+            },
+          },
+        });
+      }
+
+      async function readSpreadsheet(file) {
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        return XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      }
+
+      fileInput.addEventListener("change", async (event) => {
+        const [file] = event.target.files;
+        if (!file) return;
+
+        try {
+          const rows = await readSpreadsheet(file);
+          const parsed = transformRows(rows);
+          drawChart(parsed);
+          statusEl.textContent = `Planilha "${file.name}" carregada com ${parsed.length} pontos.`;
+        } catch (error) {
+          statusEl.textContent = error.message;
+        }
+      });
+
+      loadSampleBtn.addEventListener("click", () => {
+        drawChart(transformRows(sampleData));
+        statusEl.textContent = "Exemplo carregado. Envie sua planilha para atualizar o gráfico.";
+      });
+
+      drawChart(transformRows(sampleData));
+      statusEl.textContent = "Exemplo inicial carregado.";
+    </script>
   </body>
 </html>
