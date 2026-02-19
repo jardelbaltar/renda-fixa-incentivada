@@ -3,16 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Renda Fixa Inteligente</title>
+    <title>Monitor de Debêntures Incentivadas</title>
     <style>
       :root {
-        --bg: #0b1220;
-        --bg-soft: #111b30;
-        --card: #16233d;
-        --text: #f2f6ff;
-        --muted: #c3d1ea;
-        --primary: #00d0ff;
-        --secondary: #4bf2a9;
+        --bg: #e9e9e9;
+        --panel: #f3f3f3;
+        --card: #ffffff;
+        --text: #1b1b1b;
+        --muted: #5c5c5c;
+        --accent: #f15d22;
       }
 
       * {
@@ -22,231 +21,121 @@
       body {
         margin: 0;
         font-family: "Inter", "Segoe UI", Arial, sans-serif;
-        background: radial-gradient(circle at top, #17284a 0%, var(--bg) 45%);
+        background: var(--bg);
         color: var(--text);
-        line-height: 1.6;
       }
 
       .container {
-        width: min(1140px, 92%);
+        width: min(1180px, 92%);
         margin: 0 auto;
       }
 
       header {
-        padding: 84px 0 64px;
+        padding: 36px 0 30px;
       }
 
       .hero {
         display: grid;
-        grid-template-columns: 1.2fr 1fr;
-        gap: 42px;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 26px;
         align-items: center;
+        background: var(--panel);
+        border: 1px solid #d2d2d2;
+        border-radius: 14px;
+        padding: 24px;
       }
 
       .badge {
-        display: inline-flex;
-        gap: 8px;
-        align-items: center;
-        padding: 6px 12px;
-        border-radius: 999px;
-        background: rgba(75, 242, 169, 0.15);
-        color: var(--secondary);
-        font-size: 0.82rem;
-        font-weight: 700;
-        letter-spacing: 0.04em;
+        display: inline-block;
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
+        color: var(--accent);
+        font-weight: 700;
       }
 
       h1 {
-        margin: 14px 0 14px;
-        font-size: clamp(2rem, 3.8vw, 3.2rem);
+        margin: 8px 0 10px;
+        font-size: clamp(1.7rem, 3vw, 2.5rem);
         line-height: 1.15;
       }
 
       .lead {
-        margin: 0 0 28px;
+        margin: 0;
         color: var(--muted);
-        max-width: 58ch;
+        max-width: 60ch;
       }
 
-      .cta {
-        display: flex;
-        gap: 14px;
-        flex-wrap: wrap;
+      .hero-cover {
+        background: #fff;
+        border: 1px solid #d7d7d7;
+        border-radius: 12px;
+        padding: 14px;
       }
 
-      .btn {
-        border: 0;
-        border-radius: 10px;
-        padding: 12px 20px;
-        font-weight: 700;
-        cursor: pointer;
-        text-decoration: none;
-      }
-
-      .btn-primary {
-        background: linear-gradient(120deg, var(--primary), #5cc8ff);
-        color: #021425;
-      }
-
-      .btn-secondary {
-        background: rgba(255, 255, 255, 0.1);
-        color: var(--text);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-      }
-
-      .hero-media {
-        position: relative;
-      }
-
-      .hero-media img {
+      .hero-cover img {
         width: 100%;
-        border-radius: 18px;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.32);
-      }
-
-      .mini-card {
-        position: absolute;
-        right: -18px;
-        bottom: -18px;
-        background: rgba(7, 14, 25, 0.92);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 14px;
-        padding: 12px 14px;
-        min-width: 170px;
-      }
-
-      .mini-card strong {
         display: block;
-        color: var(--secondary);
-        font-size: 1.1rem;
+        object-fit: contain;
+        border-radius: 8px;
       }
 
       .section {
-        margin: 34px 0 68px;
+        margin: 0 0 28px;
       }
 
-      .section-title {
-        margin-bottom: 18px;
+      .panel {
+        background: var(--panel);
+        border: 1px solid #d2d2d2;
+        border-radius: 14px;
+        padding: 20px;
       }
 
-      .market-panel {
-        background: #f2f2f2;
-        color: #161616;
-        border-radius: 16px;
-        padding: 22px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-      }
-
-      .market-panel h3 {
+      .panel h2 {
         margin: 0;
         font-size: 2rem;
-        line-height: 1.1;
       }
 
-      .market-panel p {
-        margin: 4px 0 0;
-        color: #f15d22;
+      .panel .subtitle {
+        margin: 6px 0 18px;
+        color: var(--accent);
+        font-size: 1.55rem;
         font-weight: 700;
       }
 
-      .controls {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin: 16px 0;
-      }
-
-      .controls input,
-      .controls button {
-        border-radius: 8px;
-        border: 1px solid #d0d0d0;
-        padding: 10px 12px;
-        font: inherit;
-      }
-
-      .controls button {
-        background: #161616;
-        color: #fff;
-        cursor: pointer;
-      }
-
-      .hint {
-        margin: 4px 0 16px;
-        color: #4b4b4b;
-        font-size: 0.9rem;
+      .chart-title {
+        margin: 0 0 12px;
+        color: var(--accent);
+        font-size: 1.35rem;
+        font-weight: 700;
       }
 
       .chart-wrap {
-        background: #fff;
-        border-radius: 12px;
+        background: var(--card);
+        border: 1px solid #d8d8d8;
+        border-radius: 10px;
         padding: 12px;
-        border: 1px solid #d7d7d7;
+        height: 360px;
       }
 
-      #status {
-        margin-top: 10px;
-        min-height: 22px;
-        color: #2f2f2f;
-        font-size: 0.92rem;
-      }
-
-      .cards {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 16px;
-      }
-
-      .card {
-        background: linear-gradient(180deg, var(--card), var(--bg-soft));
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 16px;
-        overflow: hidden;
-      }
-
-      .card img {
-        width: 100%;
-        height: 170px;
-        object-fit: cover;
-        display: block;
-      }
-
-      .card-content {
-        padding: 16px;
-      }
-
-      .card h3 {
-        margin: 0 0 8px;
-        font-size: 1.05rem;
-      }
-
-      .card p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.95rem;
+      .chart-wrap canvas {
+        width: 100% !important;
+        height: 100% !important;
       }
 
       footer {
-        padding: 24px 0 46px;
-        color: #9fb0ce;
-        text-align: center;
+        padding: 8px 0 30px;
+        color: #666;
+        font-size: 0.92rem;
       }
 
-      @media (max-width: 920px) {
-        .hero,
-        .cards {
+      @media (max-width: 900px) {
+        .hero {
           grid-template-columns: 1fr;
         }
 
-        .hero-media {
-          order: -1;
-        }
-
-        .mini-card {
-          right: 10px;
-          bottom: 10px;
+        .panel .subtitle {
+          font-size: 1.25rem;
         }
       }
     </style>
@@ -255,285 +144,162 @@
     <header>
       <div class="container hero">
         <div>
-          <span class="badge">Investimentos de renda fixa</span>
-          <h1>Construa um futuro seguro com uma estratégia moderna e previsível</h1>
+          <span class="badge">Uso interno • Mesa de crédito</span>
+          <h1>Painel de Mercado Secundário — Debêntures Incentivadas</h1>
           <p class="lead">
-            Explore oportunidades em Tesouro Direto, CDB, LCI/LCA e debêntures incentivadas em uma página desenhada para evoluir com dashboards, menus e funcionalidades futuras.
+            Visão executiva para acompanhamento técnico de aberturas/fechamentos e dinâmica do spread médio IPCA + Incentivadas.
+            Estrutura inicial orientada para especialistas de mercado.
           </p>
-          <div class="cta">
-            <a class="btn btn-primary" href="#">Começar análise</a>
-            <a class="btn btn-secondary" href="#">Simular carteira</a>
-          </div>
         </div>
-        <div class="hero-media">
-          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80" alt="Painel com gráficos financeiros e análise de investimentos" />
-          <div class="mini-card">
-            <span>Rentabilidade projetada</span>
-            <strong>12,4% a.a.</strong>
-            <small>Com foco em renda fixa</small>
-          </div>
+        <div class="hero-cover">
+          <img src="More Invest Asset - Logo (1).png" alt="Identidade visual More Invest Asset" />
         </div>
       </div>
     </header>
 
     <main class="container">
-      <section class="section">
-        <div class="market-panel">
-          <h3>Curva DEBIN Incentivada</h3>
-          <p>Spread das debêntures incentivadas ao longo da duration (vs. NTN-B)</p>
-
-          <div class="controls">
-            <input id="sheetFile" type="file" accept=".xlsx,.xls,.csv" />
-            <button id="loadSample" type="button">Carregar exemplo</button>
-          </div>
-          <p class="hint">
-            Planilha esperada com colunas: <strong>Nome do Ativo</strong>, <strong>Data</strong>, <strong>Duration</strong> e
-            <strong>Taxa Indicativa</strong>. O gráfico usa a última data disponível para mostrar o spread em bps por duration.
-          </p>
-
-          <div class="chart-wrap">
-            <canvas id="spreadChart" height="260"></canvas>
-          </div>
-          <div id="status"></div>
+      <section class="section panel">
+        <p class="chart-title">Variação Spreads IPCA + Incentivadas (bps)</p>
+        <div class="chart-wrap">
+          <canvas id="spreadByDurationChart"></canvas>
         </div>
       </section>
 
-      <section class="section">
-        <h2 class="section-title">Visão completa para decisões inteligentes</h2>
-        <div class="cards">
-          <article class="card">
-            <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1000&q=80" alt="Pessoa analisando gráficos em notebook" />
-            <div class="card-content">
-              <h3>Monitoramento de mercado</h3>
-              <p>Acompanhe curvas de juros, inflação e benchmark para encontrar os melhores títulos.</p>
-            </div>
-          </article>
-
-          <article class="card">
-            <img src="https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&w=1000&q=80" alt="Equipe financeira reunida em escritório moderno" />
-            <div class="card-content">
-              <h3>Planejamento em equipe</h3>
-              <p>Organize metas por perfil de risco e prazo com colaboração entre analistas e clientes.</p>
-            </div>
-          </article>
-
-          <article class="card">
-            <img src="https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1000&q=80" alt="Tela com evolução de gráficos de rentabilidade" />
-            <div class="card-content">
-              <h3>Resultados transparentes</h3>
-              <p>Visualize rendimentos líquidos e cenários para manter sua carteira de renda fixa eficiente.</p>
-            </div>
-          </article>
+      <section class="section panel">
+        <h2>Mercado Secundário</h2>
+        <p class="subtitle">Evolução Spread Médio IPCA + Incentivadas (bps)</p>
+        <div class="chart-wrap">
+          <canvas id="spreadEvolutionChart"></canvas>
         </div>
       </section>
     </main>
 
     <footer>
-      <div class="container">Página inicial pronta para expansão com menus e novas funcionalidades.</div>
+      <div class="container">Fonte interna: acompanhamento de negociação no secundário.</div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
-      const sampleData = [
-        { "Nome do Ativo": "DEB Inc. A", Data: "2026-02-19", Duration: 840, "Taxa Indicativa": "IPCA + 5.10%" },
-        { "Nome do Ativo": "DEB Inc. B", Data: "2026-02-19", Duration: 1750, "Taxa Indicativa": "IPCA + 5.85%" },
-        { "Nome do Ativo": "DEB Inc. C", Data: "2026-02-19", Duration: 2590, "Taxa Indicativa": "IPCA + 6.35%" },
-        { "Nome do Ativo": "DEB Inc. D", Data: "2026-02-19", Duration: 3720, "Taxa Indicativa": "IPCA + 6.95%" },
+      const spreadByDurationCtx = document.getElementById("spreadByDurationChart");
+      const spreadEvolutionCtx = document.getElementById("spreadEvolutionChart");
+
+      const cloudPoints = [
+        { x: 1.0, y: -8 }, { x: 1.4, y: -2 }, { x: 1.8, y: -12 }, { x: 2.2, y: 4 }, { x: 2.7, y: 2 },
+        { x: 3.1, y: -5 }, { x: 3.5, y: 8 }, { x: 3.8, y: -3 }, { x: 4.2, y: 6 }, { x: 4.6, y: -10 },
+        { x: 5.0, y: -7 }, { x: 5.4, y: 5 }, { x: 5.8, y: -14 }, { x: 6.2, y: -1 }, { x: 6.6, y: -6 },
+        { x: 7.0, y: 4 }, { x: 7.4, y: -8 }, { x: 7.8, y: 10 }, { x: 8.2, y: -2 }, { x: 8.6, y: -5 },
+        { x: 9.0, y: 2 }, { x: 9.4, y: -11 }, { x: 9.8, y: -3 }, { x: 10.1, y: 1 },
       ];
 
-      const statusEl = document.getElementById("status");
-      const fileInput = document.getElementById("sheetFile");
-      const loadSampleBtn = document.getElementById("loadSample");
-      const chartCtx = document.getElementById("spreadChart");
+      const topOpenings = [
+        { x: 2.5, y: 30 }, { x: 2.9, y: 28 }, { x: 3.4, y: 33 }, { x: 3.8, y: 58 },
+        { x: 4.4, y: 35 }, { x: 6.3, y: 62 }, { x: 7.1, y: 42 }, { x: 7.6, y: 34 },
+      ];
 
-      let spreadChart;
+      const topClosings = [
+        { x: 1.0, y: -108 }, { x: 2.6, y: -86 }, { x: 3.4, y: -52 }, { x: 5.9, y: -45 },
+        { x: 6.3, y: -31 }, { x: 6.8, y: -38 }, { x: 8.1, y: -48 }, { x: 8.4, y: -41 }, { x: 9.2, y: -29 },
+      ];
 
-      function normalizeName(value) {
-        return (value || "")
-          .toString()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toLowerCase()
-          .replace(/\s+/g, "")
-          .replace(/[().]/g, "");
-      }
-
-      function parseExcelDate(value) {
-        const serial = Number(value);
-        if (!Number.isFinite(serial)) return null;
-        const excelEpoch = new Date(Date.UTC(1899, 11, 30));
-        const date = new Date(excelEpoch.getTime() + serial * 86400000);
-        return Number.isNaN(date.getTime()) ? null : date;
-      }
-
-      function toDate(value) {
-        if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
-
-        const fromExcel = parseExcelDate(value);
-        if (fromExcel) return fromExcel;
-
-        const str = String(value || "").trim();
-        if (!str) return null;
-
-        const parsed = new Date(str);
-        return Number.isNaN(parsed.getTime()) ? null : parsed;
-      }
-
-      function toNumber(value) {
-        if (typeof value === "number") return value;
-        if (value === null || value === undefined) return NaN;
-
-        const str = String(value).trim();
-        if (!str) return NaN;
-
-        const pctMatch = str.match(/(-?\d+[\d.,]*)\s*%/);
-        const ipcaMatch = str.match(/ipca\s*\+\s*(-?\d+[\d.,]*)/i);
-        const numericToken = pctMatch?.[1] || ipcaMatch?.[1] || str;
-
-        const cleaned = numericToken.replace(/\.(?=\d{3}(\D|$))/g, "").replace(",", ".").replace(/[^0-9.-]/g, "");
-        const num = Number(cleaned);
-        if (!Number.isFinite(num)) return NaN;
-
-        if ((pctMatch || ipcaMatch) && Math.abs(num) <= 100) {
-          return num / 100;
-        }
-
-        if (!pctMatch && !ipcaMatch && Math.abs(num) > 1) {
-          return num / 100;
-        }
-
-        return num;
-      }
-
-      function getValue(row, aliases) {
-        const found = Object.keys(row).find((key) => aliases.includes(normalizeName(key)));
-        return found ? row[found] : undefined;
-      }
-
-      function transformRows(rows) {
-        const parsed = rows
-          .map((row) => {
-            const nomeAtivo = getValue(row, ["nomedoativo", "ativo", "ticker"]);
-            const data = getValue(row, ["data", "periodo", "dtbase"]);
-            const durationDias = toNumber(getValue(row, ["duration", "prazo", "duracao"]));
-            const taxa = toNumber(getValue(row, ["taxaindicativa", "taxa", "taxaipca", "spread"]));
-
-            const dataRef = toDate(data);
-            const durationAnos = Number.isFinite(durationDias) ? durationDias / 365 : NaN;
-            const spreadBps = Number.isFinite(taxa) ? taxa * 10000 : NaN;
-
-            return {
-              nomeAtivo: nomeAtivo ? String(nomeAtivo) : "Ativo sem nome",
-              dataRef,
-              durationAnos,
-              spreadBps,
-            };
-          })
-          .filter((row) => row.dataRef && Number.isFinite(row.durationAnos) && Number.isFinite(row.spreadBps));
-
-        if (!parsed.length) {
-          throw new Error("Nenhuma linha válida encontrada. Confira as colunas Nome do Ativo, Data, Duration e Taxa Indicativa.");
-        }
-
-        const latestDate = parsed.reduce((max, row) => (row.dataRef > max ? row.dataRef : max), parsed[0].dataRef);
-        const latestRows = parsed
-          .filter((row) => row.dataRef.getTime() === latestDate.getTime())
-          .sort((a, b) => a.durationAnos - b.durationAnos);
-
-        if (!latestRows.length) {
-          throw new Error("Não foi possível identificar a última data de referência na planilha.");
-        }
-
-        return { latestRows, latestDate };
-      }
-
-      function drawChart(payload) {
-        const { latestRows, latestDate } = payload;
-
-        if (spreadChart) {
-          spreadChart.destroy();
-        }
-
-        spreadChart = new Chart(chartCtx, {
-          type: "scatter",
-          data: {
-            datasets: [
-              {
-                label: `Spread DEBIN vs NTN-B (${latestDate.toLocaleDateString("pt-BR")})`,
-                data: latestRows.map((row) => ({ x: row.durationAnos, y: row.spreadBps, nomeAtivo: row.nomeAtivo })),
-                backgroundColor: "#161616",
-                borderColor: "#f15d22",
-                pointRadius: 4,
-                pointHoverRadius: 6,
-              },
-            ],
+      new Chart(spreadByDurationCtx, {
+        type: "scatter",
+        data: {
+          datasets: [
+            {
+              label: "Base do mercado",
+              data: cloudPoints,
+              pointRadius: 4,
+              pointBackgroundColor: "#bfbfbf",
+              pointBorderColor: "#bfbfbf",
+            },
+            {
+              label: "Maiores Aberturas",
+              data: topOpenings,
+              pointRadius: 5,
+              pointBackgroundColor: "#f15d22",
+              pointBorderColor: "#f15d22",
+            },
+            {
+              label: "Maiores Fechamentos",
+              data: topClosings,
+              pointRadius: 5,
+              pointBackgroundColor: "#111111",
+              pointBorderColor: "#111111",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { usePointStyle: true, boxWidth: 10 },
+            },
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: "bottom",
-                labels: { usePointStyle: true, pointStyle: "circle" },
-              },
-              tooltip: {
-                callbacks: {
-                  label(context) {
-                    const p = context.raw;
-                    return `${p.nomeAtivo}: ${p.x.toFixed(2)} anos | ${p.y.toFixed(0)} bps`;
-                  },
+          scales: {
+            x: {
+              type: "linear",
+              min: 1,
+              max: 11,
+              title: { display: true, text: "Duration" },
+              grid: { color: "#d0d0d0" },
+              ticks: {
+                stepSize: 2,
+                callback(value) {
+                  return Number(value).toFixed(1).replace(".", ",");
                 },
               },
             },
-            scales: {
-              x: {
-                type: "linear",
-                title: { display: true, text: "Duration (anos)", color: "#272727" },
-                ticks: { color: "#272727" },
-                grid: { color: "#efefef" },
-              },
-              y: {
-                title: { display: true, text: "Spread (bps)", color: "#272727" },
-                ticks: { color: "#272727" },
-                grid: { color: "#efefef" },
-              },
+            y: {
+              min: -120,
+              max: 100,
+              title: { display: true, text: "Aberturas/Fechamento" },
+              grid: { color: "#d0d0d0" },
             },
           },
-        });
-      }
-
-      async function readSpreadsheet(file) {
-        const buffer = await file.arrayBuffer();
-        const workbook = XLSX.read(buffer, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        return XLSX.utils.sheet_to_json(sheet, { defval: "" });
-      }
-
-      fileInput.addEventListener("change", async (event) => {
-        const [file] = event.target.files;
-        if (!file) return;
-
-        try {
-          const rows = await readSpreadsheet(file);
-          const parsed = transformRows(rows);
-          drawChart(parsed);
-          statusEl.textContent = `Planilha "${file.name}" carregada. Última data: ${parsed.latestDate.toLocaleDateString("pt-BR")} (${parsed.latestRows.length} ativos).`;
-        } catch (error) {
-          statusEl.textContent = error.message;
-        }
+        },
       });
 
-      loadSampleBtn.addEventListener("click", () => {
-        const parsed = transformRows(sampleData);
-        drawChart(parsed);
-        statusEl.textContent = "Exemplo carregado no formato DEBIN (spread x duration).";
-      });
+      const labels = ["jan-25", "fev-25", "mar-25", "abr-25", "mai-25", "jun-25", "jul-25", "ago-25", "set-25", "out-25", "nov-25", "dez-25", "jan-26"];
+      const spreadMedioGeral = [48, 46, 43, 39, 42, 35, 18, 14, -5, -42, 8, 12, -28];
 
-      const parsedSample = transformRows(sampleData);
-      drawChart(parsedSample);
-      statusEl.textContent = "Exemplo inicial carregado no formato DEBIN.";
+      new Chart(spreadEvolutionCtx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Total (geral)",
+              data: spreadMedioGeral,
+              borderColor: "#111111",
+              borderWidth: 4,
+              tension: 0.25,
+              pointRadius: 0,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+            },
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+            },
+            y: {
+              min: -80,
+              max: 80,
+              ticks: { stepSize: 20 },
+              grid: { color: "#d0d0d0" },
+            },
+          },
+        },
+      });
     </script>
   </body>
 </html>
