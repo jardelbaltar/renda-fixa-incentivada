@@ -11,7 +11,7 @@
         --card: #ffffff;
         --text: #1b1b1b;
         --muted: #5c5c5c;
-        --accent: #f15d22;
+        --accent: #0b3d2e;
       }
 
       * {
@@ -144,11 +144,10 @@
     <header>
       <div class="container hero">
         <div>
-          <span class="badge">Uso interno • Mesa de crédito</span>
-          <h1>Painel de Mercado Secundário — Debêntures Incentivadas</h1>
+          <span class="badge">USO INTERNO</span>
+          <h1>Mercado Secundário — Debêntures Incentivadas</h1>
           <p class="lead">
-            Visão executiva para acompanhamento técnico de aberturas/fechamentos e dinâmica do spread médio IPCA + Incentivadas.
-            Estrutura inicial orientada para especialistas de mercado.
+            Acompanhamento da dinâmica do spread médio IPCA + Incentivadas.
           </p>
         </div>
         <div class="hero-cover">
@@ -163,6 +162,7 @@
         <div class="chart-wrap">
           <canvas id="spreadByDurationChart"></canvas>
         </div>
+        <p>Fonte: Quantum Axis.</p>
       </section>
 
       <section class="section panel">
@@ -171,12 +171,9 @@
         <div class="chart-wrap">
           <canvas id="spreadEvolutionChart"></canvas>
         </div>
+        <p>Fonte: Quantum Axis.</p>
       </section>
     </main>
-
-    <footer>
-      <div class="container">Fonte interna: acompanhamento de negociação no secundário.</div>
-    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script>
@@ -216,8 +213,8 @@
               label: "Maiores Aberturas",
               data: topOpenings,
               pointRadius: 5,
-              pointBackgroundColor: "#f15d22",
-              pointBorderColor: "#f15d22",
+              pointBackgroundColor: "#0b3d2e",
+              pointBorderColor: "#0b3d2e",
             },
             {
               label: "Maiores Fechamentos",
