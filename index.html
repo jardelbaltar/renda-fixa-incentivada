@@ -279,16 +279,16 @@
     <main class="container">
       <section class="section">
         <div class="market-panel">
-          <h3>Mercado Secundário</h3>
-          <p>Evolução Spread Médio IPCA + Incentivadas por Rating (bps)</p>
+          <h3>Curva DEBIN Incentivada</h3>
+          <p>Spread das debêntures incentivadas ao longo da duration (vs. NTN-B)</p>
 
           <div class="controls">
             <input id="sheetFile" type="file" accept=".xlsx,.xls,.csv" />
             <button id="loadSample" type="button">Carregar exemplo</button>
           </div>
           <p class="hint">
-            Planilha esperada com colunas: <strong>Período</strong>, <strong>AAA</strong>, <strong>Total (ex. AAA)</strong> e
-            <strong>Total</strong>.
+            Planilha esperada com colunas: <strong>Nome do Ativo</strong>, <strong>Data</strong>, <strong>Duration</strong> e
+            <strong>Taxa Indicativa</strong>. O gráfico usa a última data disponível para mostrar o spread em bps por duration.
           </p>
 
           <div class="chart-wrap">
@@ -336,14 +336,10 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
       const sampleData = [
-        { Periodo: "jan-25", AAA: 32, "Total (ex. AAA)": 62, Total: 22 },
-        { Periodo: "mar-25", AAA: 26, "Total (ex. AAA)": 53, Total: 18 },
-        { Periodo: "mai-25", AAA: 16, "Total (ex. AAA)": 79, Total: 9 },
-        { Periodo: "jul-25", AAA: 8, "Total (ex. AAA)": 42, Total: 2 },
-        { Periodo: "set-25", AAA: -22, "Total (ex. AAA)": 46, Total: -12 },
-        { Periodo: "out-25", AAA: -68, "Total (ex. AAA)": 18, Total: -44 },
-        { Periodo: "nov-25", AAA: -18, "Total (ex. AAA)": 28, Total: -2 },
-        { Periodo: "jan-26", AAA: -42, "Total (ex. AAA)": 16, Total: -28 },
+        { "Nome do Ativo": "DEB Inc. A", Data: "2026-02-19", Duration: 840, "Taxa Indicativa": "IPCA + 5.10%" },
+        { "Nome do Ativo": "DEB Inc. B", Data: "2026-02-19", Duration: 1750, "Taxa Indicativa": "IPCA + 5.85%" },
+        { "Nome do Ativo": "DEB Inc. C", Data: "2026-02-19", Duration: 2590, "Taxa Indicativa": "IPCA + 6.35%" },
+        { "Nome do Ativo": "DEB Inc. D", Data: "2026-02-19", Duration: 3720, "Taxa Indicativa": "IPCA + 6.95%" },
       ];
 
       const statusEl = document.getElementById("status");
@@ -363,11 +359,51 @@
           .replace(/[().]/g, "");
       }
 
+      function parseExcelDate(value) {
+        const serial = Number(value);
+        if (!Number.isFinite(serial)) return null;
+        const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+        const date = new Date(excelEpoch.getTime() + serial * 86400000);
+        return Number.isNaN(date.getTime()) ? null : date;
+      }
+
+      function toDate(value) {
+        if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
+
+        const fromExcel = parseExcelDate(value);
+        if (fromExcel) return fromExcel;
+
+        const str = String(value || "").trim();
+        if (!str) return null;
+
+        const parsed = new Date(str);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+      }
+
       function toNumber(value) {
         if (typeof value === "number") return value;
-        if (typeof value !== "string") return NaN;
-        const cleaned = value.replace(/\./g, "").replace(",", ".").replace(/[^0-9.-]/g, "");
-        return Number(cleaned);
+        if (value === null || value === undefined) return NaN;
+
+        const str = String(value).trim();
+        if (!str) return NaN;
+
+        const pctMatch = str.match(/(-?\d+[\d.,]*)\s*%/);
+        const ipcaMatch = str.match(/ipca\s*\+\s*(-?\d+[\d.,]*)/i);
+        const numericToken = pctMatch?.[1] || ipcaMatch?.[1] || str;
+
+        const cleaned = numericToken.replace(/\.(?=\d{3}(\D|$))/g, "").replace(",", ".").replace(/[^0-9.-]/g, "");
+        const num = Number(cleaned);
+        if (!Number.isFinite(num)) return NaN;
+
+        if ((pctMatch || ipcaMatch) && Math.abs(num) <= 100) {
+          return num / 100;
+        }
+
+        if (!pctMatch && !ipcaMatch && Math.abs(num) > 1) {
+          return num / 100;
+        }
+
+        return num;
       }
 
       function getValue(row, aliases) {
@@ -376,69 +412,60 @@
       }
 
       function transformRows(rows) {
-        const formatted = rows
+        const parsed = rows
           .map((row) => {
-            const periodo = getValue(row, ["periodo", "mes", "data"]);
-            const aaa = toNumber(getValue(row, ["aaa"]));
-            const totalExAaa = toNumber(getValue(row, ["totalexaaa", "totalexcaaa", "totalsemaaa", "totalsexaaa"]));
-            const total = toNumber(getValue(row, ["total"]));
+            const nomeAtivo = getValue(row, ["nomedoativo", "ativo", "ticker"]);
+            const data = getValue(row, ["data", "periodo", "dtbase"]);
+            const durationDias = toNumber(getValue(row, ["duration", "prazo", "duracao"]));
+            const taxa = toNumber(getValue(row, ["taxaindicativa", "taxa", "taxaipca", "spread"]));
+
+            const dataRef = toDate(data);
+            const durationAnos = Number.isFinite(durationDias) ? durationDias / 365 : NaN;
+            const spreadBps = Number.isFinite(taxa) ? taxa * 10000 : NaN;
 
             return {
-              periodo: periodo ? String(periodo) : null,
-              aaa,
-              totalExAaa,
-              total,
+              nomeAtivo: nomeAtivo ? String(nomeAtivo) : "Ativo sem nome",
+              dataRef,
+              durationAnos,
+              spreadBps,
             };
           })
-          .filter((row) => row.periodo && ![row.aaa, row.totalExAaa, row.total].some(Number.isNaN));
+          .filter((row) => row.dataRef && Number.isFinite(row.durationAnos) && Number.isFinite(row.spreadBps));
 
-        if (!formatted.length) {
-          throw new Error("Nenhuma linha válida encontrada. Confira os nomes das colunas na planilha.");
+        if (!parsed.length) {
+          throw new Error("Nenhuma linha válida encontrada. Confira as colunas Nome do Ativo, Data, Duration e Taxa Indicativa.");
         }
 
-        return formatted;
+        const latestDate = parsed.reduce((max, row) => (row.dataRef > max ? row.dataRef : max), parsed[0].dataRef);
+        const latestRows = parsed
+          .filter((row) => row.dataRef.getTime() === latestDate.getTime())
+          .sort((a, b) => a.durationAnos - b.durationAnos);
+
+        if (!latestRows.length) {
+          throw new Error("Não foi possível identificar a última data de referência na planilha.");
+        }
+
+        return { latestRows, latestDate };
       }
 
-      function drawChart(rows) {
-        const labels = rows.map((row) => row.periodo);
-        const aaa = rows.map((row) => row.aaa);
-        const totalExAaa = rows.map((row) => row.totalExAaa);
-        const total = rows.map((row) => row.total);
+      function drawChart(payload) {
+        const { latestRows, latestDate } = payload;
 
         if (spreadChart) {
           spreadChart.destroy();
         }
 
         spreadChart = new Chart(chartCtx, {
-          type: "line",
+          type: "scatter",
           data: {
-            labels,
             datasets: [
               {
-                label: "AAA",
-                data: aaa,
-                borderColor: "#f97316",
-                borderDash: [2, 6],
-                tension: 0.32,
-                borderWidth: 3,
-                pointRadius: 0,
-              },
-              {
-                label: "Total (ex. AAA)",
-                data: totalExAaa,
-                borderColor: "#808080",
-                borderDash: [1, 6],
-                tension: 0.32,
-                borderWidth: 3,
-                pointRadius: 0,
-              },
-              {
-                label: "Total",
-                data: total,
-                borderColor: "#161616",
-                tension: 0.32,
-                borderWidth: 3,
-                pointRadius: 0,
+                label: `Spread DEBIN vs NTN-B (${latestDate.toLocaleDateString("pt-BR")})`,
+                data: latestRows.map((row) => ({ x: row.durationAnos, y: row.spreadBps, nomeAtivo: row.nomeAtivo })),
+                backgroundColor: "#161616",
+                borderColor: "#f15d22",
+                pointRadius: 4,
+                pointHoverRadius: 6,
               },
             ],
           },
@@ -448,18 +475,27 @@
             plugins: {
               legend: {
                 position: "bottom",
-                labels: { usePointStyle: true, pointStyle: "line" },
+                labels: { usePointStyle: true, pointStyle: "circle" },
+              },
+              tooltip: {
+                callbacks: {
+                  label(context) {
+                    const p = context.raw;
+                    return `${p.nomeAtivo}: ${p.x.toFixed(2)} anos | ${p.y.toFixed(0)} bps`;
+                  },
+                },
               },
             },
             scales: {
               x: {
-                grid: { display: false },
+                type: "linear",
+                title: { display: true, text: "Duration (anos)", color: "#272727" },
                 ticks: { color: "#272727" },
+                grid: { color: "#efefef" },
               },
               y: {
-                suggestedMin: -80,
-                suggestedMax: 80,
-                ticks: { stepSize: 20, color: "#272727" },
+                title: { display: true, text: "Spread (bps)", color: "#272727" },
+                ticks: { color: "#272727" },
                 grid: { color: "#efefef" },
               },
             },
@@ -483,19 +519,21 @@
           const rows = await readSpreadsheet(file);
           const parsed = transformRows(rows);
           drawChart(parsed);
-          statusEl.textContent = `Planilha "${file.name}" carregada com ${parsed.length} pontos.`;
+          statusEl.textContent = `Planilha "${file.name}" carregada. Última data: ${parsed.latestDate.toLocaleDateString("pt-BR")} (${parsed.latestRows.length} ativos).`;
         } catch (error) {
           statusEl.textContent = error.message;
         }
       });
 
       loadSampleBtn.addEventListener("click", () => {
-        drawChart(transformRows(sampleData));
-        statusEl.textContent = "Exemplo carregado. Envie sua planilha para atualizar o gráfico.";
+        const parsed = transformRows(sampleData);
+        drawChart(parsed);
+        statusEl.textContent = "Exemplo carregado no formato DEBIN (spread x duration).";
       });
 
-      drawChart(transformRows(sampleData));
-      statusEl.textContent = "Exemplo inicial carregado.";
+      const parsedSample = transformRows(sampleData);
+      drawChart(parsedSample);
+      statusEl.textContent = "Exemplo inicial carregado no formato DEBIN.";
     </script>
   </body>
 </html>
