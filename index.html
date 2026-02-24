@@ -6,12 +6,18 @@
     <title>Monitor de Debêntures Incentivadas</title>
     <style>
       :root {
-        --bg: #e9e9e9;
-        --panel: #f3f3f3;
-        --card: #ffffff;
-        --text: #1b1b1b;
-        --muted: #5c5c5c;
-        --accent: #0b3d2e;
+        --bg: #f5f7fb;
+        --panel: #ffffff;
+        --card: #f9fbff;
+        --text: #20252e;
+        --muted: #57575d;
+        --accent: #1b3453;
+        --accent-soft: #276a7c;
+        --line-main: #446ec4;
+        --line-alt: #54a0f0;
+        --line-spread: #0f1720;
+        --grid: #dce3ee;
+        --zero-line: #6b778c;
       }
 
       * {
@@ -40,7 +46,7 @@
         gap: 26px;
         align-items: center;
         background: var(--panel);
-        border: 1px solid #d2d2d2;
+        border: 1px solid #dce3ee;
         border-radius: 14px;
         padding: 24px;
       }
@@ -50,7 +56,7 @@
         font-size: 0.78rem;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: var(--accent);
+        color: #005f75;
         font-weight: 700;
       }
 
@@ -68,7 +74,7 @@
 
       .hero-cover {
         background: #fff;
-        border: 1px solid #d7d7d7;
+        border: 1px solid #dce3ee;
         border-radius: 12px;
         padding: 14px;
       }
@@ -86,7 +92,7 @@
 
       .panel {
         background: var(--panel);
-        border: 1px solid #d2d2d2;
+        border: 1px solid #dce3ee;
         border-radius: 14px;
         padding: 20px;
       }
@@ -112,7 +118,7 @@
 
       .chart-wrap {
         background: var(--card);
-        border: 1px solid #d8d8d8;
+        border: 1px solid #dce3ee;
         border-radius: 10px;
         padding: 12px;
         height: 360px;
@@ -125,7 +131,7 @@
 
       footer {
         padding: 8px 0 30px;
-        color: #666;
+        color: #57575d;
         font-size: 0.92rem;
       }
 
@@ -158,14 +164,6 @@
 
     <main class="container">
       <section class="section panel">
-        <p class="chart-title">Variação Spreads IPCA + Incentivadas (bps)</p>
-        <div class="chart-wrap">
-          <canvas id="spreadByDurationChart"></canvas>
-        </div>
-        <p>Fonte: Quantum Axis.</p>
-      </section>
-
-      <section class="section panel">
         <h2>Mercado Secundário</h2>
         <p class="subtitle">Evolução Spread Médio IPCA + Incentivadas (bps)</p>
         <div class="chart-wrap">
@@ -173,103 +171,58 @@
         </div>
         <p>Fonte: Quantum Axis.</p>
       </section>
+
+      <section class="section panel">
+        <p class="chart-title">Variação média quinzenal das taxas (bps)</p>
+        <div class="chart-wrap">
+          <canvas id="quinzenalChart"></canvas>
+        </div>
+        <p>Fonte: Quantum Axis.</p>
+      </section>
+
+      <section class="section panel">
+        <p class="chart-title">Variação média mensal das taxas (bps)</p>
+        <div class="chart-wrap">
+          <canvas id="mensalChart"></canvas>
+        </div>
+        <p>Fonte: Quantum Axis.</p>
+      </section>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script>
-      const spreadByDurationCtx = document.getElementById("spreadByDurationChart");
       const spreadEvolutionCtx = document.getElementById("spreadEvolutionChart");
+      const quinzenalCtx = document.getElementById("quinzenalChart");
+      const mensalCtx = document.getElementById("mensalChart");
 
-      const cloudPoints = [
-        { x: 1.0, y: -8 }, { x: 1.4, y: -2 }, { x: 1.8, y: -12 }, { x: 2.2, y: 4 }, { x: 2.7, y: 2 },
-        { x: 3.1, y: -5 }, { x: 3.5, y: 8 }, { x: 3.8, y: -3 }, { x: 4.2, y: 6 }, { x: 4.6, y: -10 },
-        { x: 5.0, y: -7 }, { x: 5.4, y: 5 }, { x: 5.8, y: -14 }, { x: 6.2, y: -1 }, { x: 6.6, y: -6 },
-        { x: 7.0, y: 4 }, { x: 7.4, y: -8 }, { x: 7.8, y: 10 }, { x: 8.2, y: -2 }, { x: 8.6, y: -5 },
-        { x: 9.0, y: 2 }, { x: 9.4, y: -11 }, { x: 9.8, y: -3 }, { x: 10.1, y: 1 },
-      ];
-
-      const topOpenings = [
-        { x: 2.5, y: 30 }, { x: 2.9, y: 28 }, { x: 3.4, y: 33 }, { x: 3.8, y: 58 },
-        { x: 4.4, y: 35 }, { x: 6.3, y: 62 }, { x: 7.1, y: 42 }, { x: 7.6, y: 34 },
-      ];
-
-      const topClosings = [
-        { x: 1.0, y: -108 }, { x: 2.6, y: -86 }, { x: 3.4, y: -52 }, { x: 5.9, y: -45 },
-        { x: 6.3, y: -31 }, { x: 6.8, y: -38 }, { x: 8.1, y: -48 }, { x: 8.4, y: -41 }, { x: 9.2, y: -29 },
-      ];
-
-      new Chart(spreadByDurationCtx, {
-        type: "scatter",
-        data: {
-          datasets: [
-            {
-              label: "Base do mercado",
-              data: cloudPoints,
-              pointRadius: 4,
-              pointBackgroundColor: "#bfbfbf",
-              pointBorderColor: "#bfbfbf",
-            },
-            {
-              label: "Maiores Aberturas",
-              data: topOpenings,
-              pointRadius: 5,
-              pointBackgroundColor: "#0b3d2e",
-              pointBorderColor: "#0b3d2e",
-            },
-            {
-              label: "Maiores Fechamentos",
-              data: topClosings,
-              pointRadius: 5,
-              pointBackgroundColor: "#111111",
-              pointBorderColor: "#111111",
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "bottom",
-              labels: { usePointStyle: true, boxWidth: 10 },
-            },
-          },
-          scales: {
-            x: {
-              type: "linear",
-              min: 1,
-              max: 11,
-              title: { display: true, text: "Duration" },
-              grid: { color: "#d0d0d0" },
-              ticks: {
-                stepSize: 2,
-                callback(value) {
-                  return Number(value).toFixed(1).replace(".", ",");
-                },
-              },
-            },
-            y: {
-              min: -120,
-              max: 100,
-              title: { display: true, text: "Aberturas/Fechamento" },
-              grid: { color: "#d0d0d0" },
-            },
-          },
-        },
-      });
-
-      const labels = ["jan-25", "fev-25", "mar-25", "abr-25", "mai-25", "jun-25", "jul-25", "ago-25", "set-25", "out-25", "nov-25", "dez-25", "jan-26"];
+      const spreadLabels = ["jan-25", "fev-25", "mar-25", "abr-25", "mai-25", "jun-25", "jul-25", "ago-25", "set-25", "out-25", "nov-25", "dez-25", "jan-26"];
       const spreadMedioGeral = [48, 46, 43, 39, 42, 35, 18, 14, -5, -42, 8, 12, -28];
+
+      const formatLabel = (dateValue) => {
+        const [year, month, day] = dateValue.split("-");
+        return `${day}/${month}/${year.slice(2)}`;
+      };
+
+      const zeroHighlightYScale = {
+        title: { display: true, text: "bps" },
+        grid: {
+          color: (context) => (context.tick.value === 0 ? "#6b778c" : "#dce3ee"),
+          lineWidth: (context) => (context.tick.value === 0 ? 2.4 : 1),
+        },
+      };
+
+      const quinzenalRaw = [["2025-08-08", -17.25], ["2025-08-15", -18.35], ["2025-08-22", 5.99], ["2025-08-29", 3.47], ["2025-09-05", -14.7], ["2025-09-12", -11.52], ["2025-09-19", -17.28], ["2025-09-26", -13.81], ["2025-10-03", 0.97], ["2025-10-10", 5.86], ["2025-10-17", 8.51], ["2025-10-24", 9.99], ["2025-10-31", 15.38], ["2025-11-07", 13.59], ["2025-11-14", -18.74], ["2025-11-21", -11.13], ["2025-11-28", 0.57], ["2025-12-05", -4.47], ["2025-12-12", 10.72], ["2025-12-19", 12.51], ["2025-12-26", 3.25], ["2026-01-02", -1.62], ["2026-01-09", 2.51], ["2026-01-16", 4.05], ["2026-01-23", -14.66], ["2026-01-30", -44.04], ["2026-02-06", -16.74], ["2026-02-13", 11.46]];
+      const mensalRaw = [["2025-08-01", 7.96], ["2025-08-22", -15.94], ["2025-08-29", -23.85], ["2025-09-19", -41.77], ["2025-09-26", -28.54], ["2025-10-24", 4.93], ["2025-10-31", 34.22], ["2025-11-28", -18.39], ["2025-12-26", 14.01], ["2026-01-30", -40.68], ["2026-02-06", 442.54], ["2026-02-13", 10.75]];
 
       new Chart(spreadEvolutionCtx, {
         type: "line",
         data: {
-          labels,
+          labels: spreadLabels,
           datasets: [
             {
               label: "Total (geral)",
               data: spreadMedioGeral,
-              borderColor: "#111111",
+              borderColor: "#0f1720",
               borderWidth: 4,
               tension: 0.25,
               pointRadius: 0,
@@ -289,11 +242,79 @@
               grid: { display: false },
             },
             y: {
+              ...zeroHighlightYScale,
               min: -80,
               max: 80,
               ticks: { stepSize: 20 },
-              grid: { color: "#d0d0d0" },
             },
+          },
+        },
+      });
+
+      new Chart(quinzenalCtx, {
+        type: "line",
+        data: {
+          labels: quinzenalRaw.map((item) => formatLabel(item[0])),
+          datasets: [{
+            label: "Média da variação quinzenal",
+            data: quinzenalRaw.map((item) => item[1]),
+            borderColor: "#446ec4",
+            backgroundColor: "rgba(68, 110, 196, 0.2)",
+            borderWidth: 3,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            tension: 0.25,
+            fill: true,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { usePointStyle: true, boxWidth: 10 },
+            },
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+            },
+            y: zeroHighlightYScale,
+          },
+        },
+      });
+
+      new Chart(mensalCtx, {
+        type: "line",
+        data: {
+          labels: mensalRaw.map((item) => formatLabel(item[0])),
+          datasets: [
+            {
+              label: "Média da variação mensal",
+              data: mensalRaw.map((item) => item[1]),
+              borderColor: "#54a0f0",
+              backgroundColor: "rgba(84, 160, 240, 0.18)",
+              borderWidth: 3,
+              tension: 0.25,
+              pointRadius: 3,
+              fill: true,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+            },
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+            },
+            y: zeroHighlightYScale,
           },
         },
       });
